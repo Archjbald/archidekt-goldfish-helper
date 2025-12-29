@@ -1,23 +1,28 @@
 {
   "manifest_version": 2,
   "name": "Archidekt Goldfish Helper",
-  "version": "1.0",
-  "description": "A Firefox extension to help with goldfishing on Archidekt",
+  "version": "1.1",
+  "description": "A Firefox extension with modular config and settings",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
-"content_scripts": [
-  {
-    "matches": [
-      "https://archidekt.com/decks/*",
-      "https://archidekt.com/playtester-v2/*"
-    ],
-    "js": ["content.js"]
-  }
+  "content_scripts": [
+    {
+      "matches": [
+        "https://archidekt.com/decks/*",
+        "https://archidekt.com/playtester-v2/*"
+      ],
+      "js": [
+        "settings.js",
+        "content.js"
+      ]
+    }
   ],
   "web_accessible_resources": [
-    "styles.css",
-    "widget.html",
-    "logo_clean.png"
+    "assets/styles.css",
+    "assets/logo_clean.png",
+    "assets/widget.html",
+    "config/events.json"
   ]
 }

@@ -1,0 +1,217 @@
+button, input, select, textarea {
+    font-family: inherit;
+}
+
+.widget {
+    position: fixed;
+    top: 40%;
+    right: 20px;
+    width: 200px;
+    min-height: 100px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    padding-top: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 999999;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    box-sizing: border-box;
+    color: #333;
+    text-align: center;
+}
+
+.widget-content {
+    font-size: 14px;
+    line-height: 1.4;
+    margin-top: 5px;
+}
+
+.gear-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    color: #666;
+    transition: transform 0.2s;
+    padding: 0;
+}
+
+.gear-button:hover {
+    transform: rotate(45deg);
+    color: #333;
+}
+
+.settings-overlay {
+    position: fixed;
+    top: 45%;
+    right: 20px;
+    width: 220px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: -4px 4px 12px rgba(0,0,0,0.2);
+    z-index: 1000000;
+    font-family: sans-serif;
+    color: #333;
+    max-height: 50vh;    /* Limits height to 70% of the viewport height */
+    overflow-y: auto;    /* Adds a scrollbar only if content is too long */
+    display: flex;       /* Helps with internal layout */
+    flex-direction: column;
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.settings-row.main-link {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    gap: 10px; /* Space between checkbox and the name container */
+}
+
+.event-name {
+    display: flex;
+    padding: 4px;
+    flex-grow: 1; /* This forces the div to fill all remaining width */
+    justify-content: space-between; /* Pushes the name to the left and arrow to the right */
+    align-items: center;
+    cursor: pointer;
+    /* text-decoration: underline; */
+    font-size: 14px;
+    transition: color 0.2s;
+    border-radius: 8px;
+}
+
+.event-name:hover {
+    background: #F7EEE4;
+}
+
+#params-list {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.drilldown-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 5px;
+}
+
+.param-input-row {
+    margin-bottom: 10px;
+}
+
+.param-label {
+    font-size: 10px;
+    color: #666;
+    display: block;
+    text-transform: uppercase;
+}
+
+.param-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.event-link {
+    cursor: pointer;
+    flex-grow: 1;
+    text-decoration: underline;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+
+.event-link:hover {
+    color: #007bff;
+}
+
+.param-input-row label {
+    font-size: 10px;
+    color: #666;
+    display: block;
+    text-transform: uppercase;
+}
+
+.param-input-row input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 6px;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.turn-number {
+    font-weight: bold;
+    font-size: 18px;
+    color: #e67e22;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.logo img {
+    width: 80px;
+    height: auto;
+    display: block;
+}
+
+.threat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.threat-button {
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    text-align: left;
+    width: 100%;
+    transition: background-color 0.2s;
+}
+
+.threat-button:hover {
+    filter: brightness(1.2);
+}

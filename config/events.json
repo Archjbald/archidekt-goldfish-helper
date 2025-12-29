@@ -1,0 +1,58 @@
+{
+    "removal_needed": {
+        "type": "THREAT",
+        "enabled": true,
+        "short": "Threat",
+        "message": "Opponent played a threat!",
+        "baseProb": 0,
+        "firstTurn": 3,
+        "turnCoeff": 0.05,
+        "threatWeight": 0,
+        "duration": 3,
+        "resolvedByOpponent": 0.25,
+        "icon": "\u26A0\uFE0F"
+    },
+    "wipe_needed": {
+        "type": "THREAT",
+        "enabled": true,
+        "isWipeThreat": true,
+        "short": "Wipe",
+        "message": "Wipe needed!",
+        "baseProb": 0,
+        "firstTurn": 4,
+        "turnCoeff": 0.02,
+        "threatWeight": -0.01,
+        "duration": 3,
+        "icon": "\u26A0\uFE0F"
+    },
+    "your_threat_removed": {
+        "type": "INSTANT",
+        "enabled": true,
+        "message": "Your best permanent was removed!",
+        "baseProb": 0,
+        "firstTurn": 3,
+        "turnCoeff": 0.05,
+        "threatWeight": 0.01,
+        "icon": "\u274C"
+    },
+    "board_wipe": {
+        "type": "INSTANT",
+        "enabled": true,
+        "message": "Board wipe! Clear all creatures.",
+        "baseProb": 0,
+        "firstTurn": 4,
+        "turnCoeff": 0.02,
+        "threatWeight": 0.04,
+        "icon": "\uD83D\uDCA5"
+    },
+    "graveyard_exiled": {
+        "type": "INSTANT",
+        "enabled": true,
+        "message": "Exile your graveyard.",
+        "baseProb": 0.5,
+        "firstTurn": 4,
+        "turnCoeff": 0.01,
+        "threatWeight": 0,
+        "icon": "\uD83D\uDD26"
+    }
+}

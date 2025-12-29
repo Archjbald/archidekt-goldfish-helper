@@ -10,47 +10,18 @@ let creatureObserver = null;
 let activeThreats = []; // Array of { id, message, turnsLeft, icon }
 let pastEvents = [];
 
-const EVENT_TABLE = {
-    removal_needed: {
-        type: "THREAT",
-        message: "Opponent played a threat!",
-        probs: [0, 0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.30], // High frequency
-        threatWeight: 0.0,
-        duration: 3,
-        resolvedByOpponent: 0.25,
-        icon: "\u{26A0}\u{FE0F}" // Warning ⚠️
-    },
-    wipe_needed: {
-        type: "THREAT",
-        isWipeThreat: true, // Custom flag
-        message: "Wipe needed (Opponent overextended)!",
-        probs: [0, 0, 0, 0.05, 0.05, 0.10, 0.10, 0.30], // High frequency
-        threatWeight: -0.01,
-        duration: 3,
-        icon: "\u{26A0}\u{FE0F}" // Warning ⚠️
-    },
-    your_threat_removed: {
-        type: "INSTANT",
-        message: "Your best permanent was removed!",
-        probs: [0, 0, 0.10, 0.15, 0.20, 0.20, 0.20, 0.20],
-        threatWeight: 0.01,
-        icon: "\u{274C}" // Cross ❌
-    },
-    board_wipe: {
-        type: "INSTANT",
-        message: "Board wipe! Clear all creatures.",
-        probs: [0, 0, 0, 0, 0.05, 0.10, 0.15, 0.15],
-        threatWeight: 0.04, // Scales heavily with your board
-        icon: "\u{1F4A5}" // Explosion 💥
-    },
-    graveyard_exiled: {
-        type: "INSTANT",
-        message: "Bojuka Bog! Exile your graveyard.",
-        probs: [0, 0, 0.05, 0.05, 0.10, 0.10, 0.10, 0.10],
-        threatWeight: 0, // Usually happens regardless of creature count
-        icon: "\u{1F526}" // Flashlight 🔦
+let EVENT_TABLE = {};
+
+async function loadEventTable() {
+    try {
+        const url = browser.runtime.getURL("config/events.json");
+        const response = await fetch(url);
+        EVENT_TABLE = await response.json();
+        console.log("Event Table loaded from JSON");
+    } catch (error) {
+        console.error("Failed to load events.json:", error);
     }
-};
+}
 
 function simulateEvent(turn, currentCreatures) {
     const random = Math.random();
@@ -61,9 +32,12 @@ function simulateEvent(turn, currentCreatures) {
     const wipeIsNeeded = activeThreats.some(t => t.message.includes("wipe_needed") || t.id === "wipe_needed_id");
 
     for (const [key, data] of Object.entries(EVENT_TABLE)) {
-        const baseProb = data.probs[turn - 1] !== undefined
-            ? data.probs[turn - 1]
-            : data.probs[data.probs.length - 1];
+        if (data.enabled === false) continue;
+
+        let baseProb = 0; // Declare base outside the block
+        if (turn >= (data.firstTurn || 0)) { // Add parentheses
+            baseProb = (data.baseProb || 0) + ((turn - (data.firstTurn || 0)) * (data.turnCoeff || 0));
+        }
 
         const pastSimilar = pastEvents.filter(obj => obj.message === data.message).length;
 
@@ -79,7 +53,6 @@ function simulateEvent(turn, currentCreatures) {
         const finalProb = Math.max(baseProb + modifier, 0);
         cumulative += finalProb;
 
-        // Restoration of detailed logging
         console.log(
             `- ${key}: Base ${baseProb.toFixed(2)} | ` +
             `Mod ${modifier.toFixed(2)} (WipeBoost: ${wipeBoost}) | ` +
@@ -102,31 +75,124 @@ function simulateEvent(turn, currentCreatures) {
     return null;
 }
 
-function updateWidget(type, data = {}) {
-    let widget = document.getElementById("goldfish-widget");
-    if (!widget) {
-        widget = document.createElement("div");
-        widget.id = "goldfish-widget";
-        widget.className = "widget";
-        document.body.appendChild(widget);
+async function toggleSettingsMenu(specificEventKey = null, isBackAction = false) {
+    let menu = document.getElementById("goldfish-settings-menu");
+
+    if (menu) {
+        menu.remove();
+        if (!specificEventKey && !isBackAction) return;
     }
 
-    widget.innerHTML = '';
+    menu = document.createElement("div");
+    menu.id = "goldfish-settings-menu";
+    menu.className = "settings-overlay";
+
+    if (!specificEventKey) {
+        // --- MAIN MENU ---
+        menu.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="margin: 0;">Event Settings</h4>
+                <button id="reset-all-settings" class="reset-btn" style="font-size: 10px; padding: 2px 6px; cursor: pointer;">Reset All</button>
+            </div>
+        `;
+
+        menu.querySelector("#reset-all-settings").onclick = async () => {
+            if (confirm("Are you sure you want to erase all modified parameters and reload defaults?")) {
+                await SettingsManager.clearSettings(); //
+                await loadEventTable(); // Reloads the base JSON
+                toggleSettingsMenu(null, true); // Refresh the UI
+            }
+        };
+
+        for (const [key, data] of Object.entries(EVENT_TABLE)) {
+            const row = document.createElement("div");
+            row.className = "settings-row main-link"; // Ensures the row is a flex container
+            row.innerHTML = `
+                <input type="checkbox" ${data.enabled !== false ? 'checked' : ''} id="check-${key}">
+                <div class="event-name">
+                    <span>${key.replace(/_/g, ' ')}</span>
+                    <span>&#11157;</span>
+                </div>
+            `;
+
+            row.querySelector(`#check-${key}`).onclick = (e) => {
+                e.stopPropagation();
+                data.enabled = e.target.checked;
+                SettingsManager.saveEventParams(key, data);
+            };
+
+            row.querySelector(".event-name").onclick = () => toggleSettingsMenu(key);
+            menu.appendChild(row);
+        }
+    } else {
+        const data = EVENT_TABLE[specificEventKey];
+        menu.innerHTML = `
+                <div class="drilldown-header">
+                    <button id="back-settings" class="back-btn">&#11013;</button>
+                    <h4 style="margin:0; margin-left:10px; flex-grow:1;">${specificEventKey.replace(/_/g, ' ')}</h4>
+                </div>
+                <div id="params-list"></div>
+            `;
+
+        const paramsList = menu.querySelector("#params-list");
+
+        for (const [param, value] of Object.entries(data)) {
+            if (typeof value === 'number') {
+                const formattedLabel = param.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+
+                const pRow = document.createElement("div");
+                pRow.className = "param-input-row";
+                pRow.innerHTML = `
+                    <label class="param-label">${formattedLabel}</label>
+                    <input type="number" step="0.01" class="param-input" value="${value}" data-param="${param}">
+                `;
+                paramsList.appendChild(pRow);
+            }
+        }
+
+        menu.querySelector("#back-settings").onclick = () => {
+            paramsList.querySelectorAll("input").forEach(input => {
+                const param = input.getAttribute("data-param");
+                data[param] = parseFloat(input.value) || 0;
+            });
+            SettingsManager.saveEventParams(specificEventKey, data);
+            toggleSettingsMenu(null, true);
+        };
+    }
+    document.body.appendChild(menu);
+}
+
+function updateWidget(type, data = {}) {
+    // 1. Find the existing widget from widget.html
+    const widget = document.getElementById("goldfish-widget");
+    if (!widget) return; // Wait for initializeWidget to load the HTML
+
+    // 2. Target a specific area for content so we don't delete the Gear button
+    let contentArea = widget.querySelector("#widget-content-area");
+    if (!contentArea) {
+        // Fallback if the ID isn't in your HTML yet
+        contentArea = document.createElement("div");
+        contentArea.id = "widget-content-area";
+        widget.appendChild(contentArea);
+    }
+
+    // 3. Clear ONLY the content area
+    contentArea.innerHTML = '';
 
     if (type === "LOGO") {
         const logoDiv = document.createElement("div");
         logoDiv.className = "logo";
         const img = document.createElement("img");
-        img.src = browser.runtime.getURL("logo_clean.png");
+        img.src = browser.runtime.getURL("assets/logo_clean.png");
         img.alt = "Goldfish Helper";
         logoDiv.appendChild(img);
-        widget.appendChild(logoDiv);
+        contentArea.appendChild(logoDiv);
     } else if (type === "EVENT") {
         // Row 1: Turn Number
         const turnElement = document.createElement("div");
         turnElement.className = "turn-number";
         turnElement.textContent = `Turn: ${data.turn}`;
-        widget.appendChild(turnElement);
+        contentArea.appendChild(turnElement);
 
         // Row 2: Event Message
         const messageElement = document.createElement("div");
@@ -136,7 +202,7 @@ function updateWidget(type, data = {}) {
         } else {
             messageElement.textContent = "No new event";
         }
-        widget.appendChild(messageElement);
+        contentArea.appendChild(messageElement);
 
         // Row 3: Threat Countdown Button
         if (activeThreats.length > 0) {
@@ -155,7 +221,7 @@ function updateWidget(type, data = {}) {
                 const isGameOver = threat.turnsLeft <= 0;
                 threatButton.textContent = isGameOver
                     ? `\u{2620}\u{FE0F} DEAD: ${threat.message}`
-                    : `${threat.icon} ${threat.turnsLeft} turns: Resolve`;
+                    : `${threat.icon} ${threat.turnsLeft} turns: Resolve ${threat.name || " "}`;
 
                 if (isGameOver) threatButton.style.backgroundColor = "black";
 
@@ -167,7 +233,7 @@ function updateWidget(type, data = {}) {
 
                 threatContainer.appendChild(threatButton);
             });
-            widget.appendChild(threatContainer);
+            contentArea.appendChild(threatContainer);
         }
     }
 }
@@ -177,14 +243,40 @@ function removeWidget() {
     if (widget) widget.remove();
 }
 
-function initializeWidget() {
+async function initializeWidget() {
+    // 1. Load the external JSON config first
+    await loadEventTable();
+
+    // 2. Apply local storage overrides via SettingsManager
+    if (typeof SettingsManager !== 'undefined') {
+        EVENT_TABLE = await SettingsManager.getMergedConfig(EVENT_TABLE);
+    }
+
+    // 3. FETCH AND INJECT THE WIDGET HTML
+    // This step is required to put the "gear-btn" and "widget-content-area" on the page
+    const resp = await fetch(browser.runtime.getURL("assets/widget.html"));
+    const htmlText = await resp.text();
+    document.body.insertAdjacentHTML('beforeend', htmlText);
+
+    // 4. Attach the Gear Button Logic
+    // Now that the HTML is injected, we can find the button
+    const gearBtn = document.getElementById("gear-btn");
+    if (gearBtn) {
+        gearBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleSettingsMenu();
+        };
+    }
+
+    // 5. Load the CSS from the assets folder
     if (!document.getElementById('goldfish-style')) {
         const link = document.createElement('link');
         link.id = 'goldfish-style';
         link.rel = 'stylesheet';
-        link.href = browser.runtime.getURL('styles.css');
+        link.href = browser.runtime.getURL('assets/styles.css');
         document.head.appendChild(link);
     }
+
     updateWidget("LOGO");
     isInitialized = true;
 }
@@ -298,7 +390,7 @@ function observeTurnChanges() {
                     // Small chance (e.g., 15%) that another player dealt with it
                     // We don't self-resolve if the game is already over (turnsLeft <= 0)
                     const resolvedByOpponent = Math.random();
-                    if (resolvedByOpponent < threat.resolvedByOpponent || 0 && threat.turnsLeft > 0) {
+                    if (resolvedByOpponent < (threat.resolvedByOpponent || 0) && threat.turnsLeft > 0) {
                         console.log(`AI Opponent dealt with: ${threat.message}`);
                         return false; // This removes the threat from the array
                     }
@@ -317,6 +409,7 @@ function observeTurnChanges() {
                         turnsLeft: rolledEvent.duration,
                         totalDuration: rolledEvent.duration,
                         icon: rolledEvent.icon,
+                        name: rolledEvent.short,
                         isWipeThreat: rolledEvent.isWipeThreat // Carry the flag over
                     });
                 }
