@@ -1,0 +1,79 @@
+
+.widget {
+    position: fixed;
+    /* Remove the 50% transform centering to prevent the "feedback loop" */
+    top: 40%;
+    right: 20px;
+    width: 200px;
+    min-height: 100px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 999999;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    /* Change to flex-start so new buttons grow downward, not from the center */
+    justify-content: flex-start;
+    align-items: center;
+    box-sizing: border-box;
+    color: #333;
+    text-align: center;
+}
+
+.widget-content {
+    font-size: 14px;
+    line-height: 1.4;
+    margin-top: 5px;
+}
+
+.turn-number {
+    font-weight: bold;
+    font-size: 18px;
+    color: #e67e22; /* Optional: adds a bit of flavor */
+}
+
+/* Updated logo class: removed fixed positioning */
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.logo img {
+    width: 80px; /* Adjusted size for visibility */
+    height: auto;
+    display: block;
+}
+
+.threat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    width: 100%; /* Force buttons to be uniform width */
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.threat-button {
+    // background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    text-align: left;
+    width: 100%; /* Ensure it fills the container */
+    /* Remove transform: scale and use a color change instead to avoid jitter */
+    transition: background-color 0.2s;
+}
+
+.threat-button:hover {
+    filter: brightness(1.2); /* Makes the dynamic color slightly lighter on hover */
+    // transform: scale(1.02);
+}
