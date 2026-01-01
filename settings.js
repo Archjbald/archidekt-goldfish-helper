@@ -1,4 +1,5 @@
 // settings.js
+var browser = browser || chrome;
 
 const SettingsManager = {
     async getMergedConfig(jsonDefaults) {

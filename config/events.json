@@ -49,9 +49,9 @@
         "type": "INSTANT",
         "enabled": true,
         "message": "Exile your graveyard.",
-        "baseProb": 0.5,
+        "baseProb": 0.2,
         "firstTurn": 4,
-        "turnCoeff": 0.01,
+        "turnCoeff": 0.0,
         "threatWeight": 0,
         "icon": "\uD83D\uDD26"
     }

@@ -1,4 +1,6 @@
 // content.js
+var browser = browser || chrome;
+
 console.log("Goldfish Helper extension loaded");
 
 let lastUrl = window.location.href;

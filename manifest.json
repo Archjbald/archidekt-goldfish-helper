@@ -1,11 +1,14 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Archidekt Goldfish Helper",
-  "version": "1.1",
-  "description": "A Firefox extension with modular config and settings",
+  "version": "1.2",
+  "description": "A cross-browser extension for Archidekt playtesting",
   "permissions": [
-    "activeTab",
     "storage"
+  ],
+  "host_permissions": [
+    "https://archidekt.com/decks/*",
+    "https://archidekt.com/playtester-v2/*"
   ],
   "content_scripts": [
     {
@@ -19,10 +22,21 @@
       ]
     }
   ],
-  "web_accessible_resources": [
-    "assets/styles.css",
-    "assets/logo_clean.png",
-    "assets/widget.html",
-    "config/events.json"
-  ]
+"web_accessible_resources": [
+    {
+      "resources": [
+        "assets/styles.css",
+        "assets/logo_clean.png",
+        "assets/widget.html",
+        "config/events.json"
+      ],
+      "matches": [
+        "https://archidekt.com/*"
+      ]
+    }
+  ],
+"icons": {
+  "48": "assets/logo_clean.png",
+  "128": "assets/logo_clean.png"
+  }
 }
