@@ -18,8 +18,10 @@
 2. **Open your browser's extensions page**:
    - **Firefox**: Type `about:debugging#/runtime/this-firefox` -> Click "Load Temporary Add-on".
    - **Chrome**: Type `chrome://extensions` -> Enable "Developer Mode" -> Click "Load unpacked".
-3. **Select the `manifest.json` file** from this folder.
+3. **Select the `manifest.json` file / the root folder**.
 4. **Open an Archidekt playtester session** and start your game!
+
+**N.B.:** You may need to fully refresh the page in the player for the extension to display properly (Ctrl+Shift+R).
 
 ## ⚙️ How to Customize
 Click the **Gear Icon (⚙️)** on the floating widget to open the settings:
